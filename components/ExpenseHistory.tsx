@@ -6,9 +6,10 @@ import { TrashIcon, CalendarIcon, DropletIcon, EuroIcon, TachometerIcon, ExportI
 interface ExpenseHistoryProps {
   expenses: ExpenseEntry[];
   onInitiateDelete: (id: number) => void;
+  newlyAddedId?: number | null;
 }
 
-const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDelete }) => {
+const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDelete, newlyAddedId }) => {
 
   const handleExport = () => {
     if (expenses.length === 0) {
@@ -90,38 +91,45 @@ const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDel
               </tr>
             </thead>
             <tbody className="bg-base-200 divide-y divide-base-300">
-              {expenses.map((expense) => (
-                <tr key={expense.id} className="md:table-row flex flex-col md:flex-row p-4 md:p-0 mb-4 md:mb-0 bg-base-200 rounded-lg md:rounded-none shadow-md md:shadow-none hover:bg-base-300/50 transition-colors">
-                  <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm font-medium text-text-primary flex items-center gap-2">
-                    <CalendarIcon className="w-4 h-4 text-text-secondary md:hidden" />
-                    <span className="font-bold md:font-medium">
-                      {new Date(expense.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })}
-                    </span>
-                  </td>
-                  <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm text-text-secondary grid grid-cols-2 md:table-cell">
-                    <span className="flex items-center gap-2 md:hidden"><DropletIcon className="w-4 h-4"/> Litros</span>
-                    <span>{expense.liters.toFixed(2)} L</span>
-                  </td>
-                  <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm text-text-secondary grid grid-cols-2 md:table-cell">
-                    <span className="flex items-center gap-2 md:hidden"><EuroIcon className="w-4 h-4"/> Precio/Litro</span>
-                    <span>{expense.pricePerLiter.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}</span>
-                  </td>
-                  <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm font-bold text-brand-primary grid grid-cols-2 md:table-cell">
-                    <span className="font-medium text-text-secondary flex items-center gap-2 md:hidden"><EuroIcon className="w-4 h-4"/> Coste Total</span>
-                    <span>{expense.totalCost.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}</span>
-                  </td>
-                  <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm text-text-secondary grid grid-cols-2 md:table-cell">
-                    <span className="flex items-center gap-2 md:hidden"><TachometerIcon className="w-4 h-4"/> Odómetro</span>
-                    <span>{expense.odometer.toLocaleString('es-ES')} km</span>
-                  </td>
-                  <td className="px-6 py-2 md:py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button onClick={() => onInitiateDelete(expense.id)} className="text-red-500 hover:text-red-400 p-2 rounded-full hover:bg-red-500/10 transition-colors">
-                      <TrashIcon className="w-5 h-5" />
-                      <span className="sr-only">Eliminar</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {expenses.map((expense, index) => {
+                const isNew = expense.id === newlyAddedId;
+                return (
+                  <tr 
+                    key={expense.id} 
+                    className={`md:table-row flex flex-col md:flex-row p-4 md:p-0 mb-4 md:mb-0 bg-base-200 rounded-lg md:rounded-none shadow-md md:shadow-none hover:bg-base-300/50 transition-colors animate-fadeInUp ${isNew ? 'animate-highlight' : ''}`}
+                    style={{ animationDelay: `${Math.min(index * 75, 750)}ms` }}
+                  >
+                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm font-medium text-text-primary flex items-center gap-2">
+                      <CalendarIcon className="w-4 h-4 text-text-secondary md:hidden" />
+                      <span className="font-bold md:font-medium">
+                        {new Date(expense.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm text-text-secondary grid grid-cols-2 md:table-cell">
+                      <span className="flex items-center gap-2 md:hidden"><DropletIcon className="w-4 h-4"/> Litros</span>
+                      <span>{expense.liters.toFixed(2)} L</span>
+                    </td>
+                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm text-text-secondary grid grid-cols-2 md:table-cell">
+                      <span className="flex items-center gap-2 md:hidden"><EuroIcon className="w-4 h-4"/> Precio/Litro</span>
+                      <span>{expense.pricePerLiter.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}</span>
+                    </td>
+                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm font-bold text-brand-primary grid grid-cols-2 md:table-cell">
+                      <span className="font-medium text-text-secondary flex items-center gap-2 md:hidden"><EuroIcon className="w-4 h-4"/> Coste Total</span>
+                      <span>{expense.totalCost.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}</span>
+                    </td>
+                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm text-text-secondary grid grid-cols-2 md:table-cell">
+                      <span className="flex items-center gap-2 md:hidden"><TachometerIcon className="w-4 h-4"/> Odómetro</span>
+                      <span>{expense.odometer.toLocaleString('es-ES')} km</span>
+                    </td>
+                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button onClick={() => onInitiateDelete(expense.id)} className="text-red-500 hover:text-red-400 p-2 rounded-full hover:bg-red-500/10 transition-colors">
+                        <TrashIcon className="w-5 h-5" />
+                        <span className="sr-only">Eliminar</span>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI, Modality } from "@google/genai";
 import { type ExpenseEntry } from './types';
@@ -16,6 +17,7 @@ const App: React.FC = () => {
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [expenseToDelete, setExpenseToDelete] = useState<number | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [newlyAddedId, setNewlyAddedId] = useState<number | null>(null);
 
   useEffect(() => {
     try {
@@ -61,6 +63,16 @@ const App: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [expenseToDelete]);
+  
+  useEffect(() => {
+    // This effect will run whenever a new expense is added.
+    if (newlyAddedId) {
+      const timer = setTimeout(() => {
+        setNewlyAddedId(null);
+      }, 2000); // Reset after 2 seconds to remove highlight
+      return () => clearTimeout(timer);
+    }
+  }, [newlyAddedId]);
 
   const handleGenerateIcon = async () => {
     setIsGeneratingIcon(true);
@@ -74,7 +86,7 @@ const App: React.FC = () => {
         contents: {
           parts: [
             {
-              text: 'Un logo moderno y minimalista para una aplicación de seguimiento de gastos de combustible. Debe combinar una boquilla de surtidor de gasolina estilizada con un gráfico de barras ascendente. El estilo debe ser plano, limpio y adecuado para un ícono de aplicación. Paleta de colores verde y gris oscuro.',
+              text: 'Crea un logo profesional y sofisticado para una aplicación financiera que rastrea los gastos de combustible. El diseño debe ser un emblema abstracto y elegante, que incorpore sutilmente elementos como una gota estilizada (representando el combustible) y una línea de gráfico o flecha ascendente (representando ahorros/eficiencia). Utiliza una paleta de colores moderna con un degradado de verde esmeralda profundo, gris carbón y un toque plateado para una sensación premium. El logo debe ser un vector limpio y escalable, adecuado para el ícono de una aplicación móvil.',
             },
           ],
         },
@@ -146,10 +158,12 @@ const App: React.FC = () => {
   };
 
   const addExpense = (newExpense: Omit<ExpenseEntry, 'id' | 'vehicleId'>) => {
+    const newId = Date.now();
     setExpenses(prevExpenses => 
-      [...prevExpenses, { ...newExpense, id: Date.now(), vehicleId: 1 }]
+      [...prevExpenses, { ...newExpense, id: newId, vehicleId: 1 }]
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     );
+    setNewlyAddedId(newId);
     handleCloseForm();
   };
 
@@ -280,7 +294,7 @@ const App: React.FC = () => {
               <Dashboard expenses={sortedExpenses} />
             </div>
             <div className="animate-fadeInUp" style={{ animationDelay: '300ms' }}>
-              <ExpenseHistory expenses={expenses} onInitiateDelete={handleInitiateDelete} />
+              <ExpenseHistory expenses={expenses} onInitiateDelete={handleInitiateDelete} newlyAddedId={newlyAddedId} />
             </div>
           </div>
         ) : (
@@ -303,7 +317,7 @@ const App: React.FC = () => {
             className="w-14 h-14 rounded-full bg-brand-primary hover:bg-brand-secondary text-white flex items-center justify-center shadow-lg transition-transform hover:scale-105"
             aria-label="Añadir Registro"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
           </button>
