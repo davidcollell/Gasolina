@@ -1,0 +1,5 @@
+{
+  "name": "Control de Gasto de Gasolina",
+  "description": "Una aplicación web para llevar un registro de los gastos de gasolina, visualizar el historial y analizar tendencias con gráficos interactivos. Los datos se guardan localmente en tu navegador.",
+  "requestFramePermissions": []
+}
