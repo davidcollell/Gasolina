@@ -18,6 +18,38 @@ const App: React.FC = () => {
   const [expenseToDelete, setExpenseToDelete] = useState<number | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newlyAddedId, setNewlyAddedId] = useState<number | null>(null);
+  
+  // PWA Install Prompt State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      setDeferredPrompt(e);
+      // Update UI notify the user they can install the PWA
+      setShowInstallButton(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    // Show the install prompt
+    deferredPrompt.prompt();
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    // We've used the prompt, and can't use it again, discard it
+    setDeferredPrompt(null);
+    setShowInstallButton(false);
+  };
 
   useEffect(() => {
     try {
@@ -177,7 +209,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-base-100 font-sans">
-      <header className="bg-base-200/80 backdrop-blur-sm shadow-lg sticky top-0 z-10">
+      <header className="bg-base-200/80 backdrop-blur-sm shadow-lg sticky top-0 z-10 safe-area-top">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <CarIcon className="w-8 h-8 text-brand-primary" />
@@ -186,6 +218,15 @@ const App: React.FC = () => {
             </h1>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
+             {showInstallButton && (
+                <button
+                  onClick={handleInstallClick}
+                  className="inline-flex items-center justify-center gap-2 px-3 py-2 border border-brand-primary text-sm font-medium rounded-md text-brand-primary bg-transparent hover:bg-brand-primary/10 transition-colors"
+                >
+                  <ArrowDownTrayIcon className="w-5 h-5" />
+                  <span className="hidden sm:inline">Instalar App</span>
+                </button>
+            )}
             <button
                 onClick={handleOpenForm}
                 className="hidden md:inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary focus:ring-offset-base-100 transition-colors"
@@ -196,7 +237,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="container mx-auto p-4 sm:p-6 lg:p-8 safe-area-bottom">
         {isFormVisible && (
           <div 
             className={`fixed inset-0 bg-black/60 z-40 flex items-center justify-center transition-opacity duration-300 ${showFormContent ? 'opacity-100' : 'opacity-0'}`} 
