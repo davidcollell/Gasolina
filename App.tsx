@@ -1,20 +1,17 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { GoogleGenAI, Modality } from "@google/genai";
 import { type ExpenseEntry } from './types';
 import ExpenseForm from './components/ExpenseForm';
 import ExpenseHistory from './components/ExpenseHistory';
 import Dashboard from './components/Dashboard';
-import { CarIcon, SparklesIcon, ExclamationTriangleIcon, ArrowDownTrayIcon } from './components/icons';
+import { CarIcon, ExclamationTriangleIcon, ArrowDownTrayIcon } from './components/icons';
 
 const App: React.FC = () => {
   const [expenses, setExpenses] = useState<ExpenseEntry[]>([]);
   
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [showFormContent, setShowFormContent] = useState(false);
-  const [generatedIconUrl, setGeneratedIconUrl] = useState<string | null>(null);
-  const [isGeneratingIcon, setIsGeneratingIcon] = useState(false);
-  const [generationError, setGenerationError] = useState<string | null>(null);
+  
   const [expenseToDelete, setExpenseToDelete] = useState<number | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newlyAddedId, setNewlyAddedId] = useState<number | null>(null);
@@ -105,60 +102,6 @@ const App: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [newlyAddedId]);
-
-  const handleGenerateIcon = async () => {
-    setIsGeneratingIcon(true);
-    setGenerationError(null);
-    setGeneratedIconUrl(null);
-
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: {
-          parts: [
-            {
-              text: 'Crea un logo profesional y sofisticado para una aplicación financiera que rastrea los gastos de combustible. El diseño debe ser un emblema abstracto y elegante, que incorpore sutilmente elementos como una gota estilizada (representando el combustible) y una línea de gráfico o flecha ascendente (representando ahorros/eficiencia). Utiliza una paleta de colores moderna con un degradado de verde esmeralda profundo, gris carbón y un toque plateado para una sensación premium. El logo debe ser un vector limpio y escalable, adecuado para el ícono de una aplicación móvil.',
-            },
-          ],
-        },
-        config: {
-            responseModalities: [Modality.IMAGE],
-        },
-      });
-
-      let foundImage = false;
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
-          const base64ImageBytes: string = part.inlineData.data;
-          const imageUrl = `data:image/png;base64,${base64ImageBytes}`;
-          setGeneratedIconUrl(imageUrl);
-          foundImage = true;
-          break;
-        }
-      }
-
-      if (!foundImage) {
-          setGenerationError("No se pudo generar el icono. Inténtalo de nuevo.");
-      }
-
-    } catch (error) {
-      console.error("Error generating icon:", error);
-      setGenerationError("Ocurrió un error al generar el icono.");
-    } finally {
-      setIsGeneratingIcon(false);
-    }
-  };
-  
-  const handleDownloadIcon = () => {
-    if (!generatedIconUrl) return;
-    const link = document.createElement('a');
-    link.href = generatedIconUrl;
-    link.download = 'icono-generado.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   const handleOpenForm = () => {
     setIsFormVisible(true);
@@ -289,45 +232,6 @@ const App: React.FC = () => {
             </div>
           </div>
         )}
-
-        <div className="bg-base-200 rounded-lg shadow-md p-6 mb-8 animate-fadeInUp">
-          <h2 className="text-xl font-bold text-text-primary mb-3">Generador de Iconos</h2>
-          <p className="text-text-secondary mb-4">Usa la IA para generar un nuevo icono moderno y distintivo para la aplicación.</p>
-          <button
-            onClick={handleGenerateIcon}
-            disabled={isGeneratingIcon}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary focus:ring-offset-base-200 transition-colors disabled:bg-base-300 disabled:cursor-not-allowed"
-          >
-            <SparklesIcon className="w-5 h-5" />
-            {isGeneratingIcon ? 'Generando...' : 'Generar Nuevo Icono'}
-          </button>
-
-          {isGeneratingIcon && (
-            <div className="mt-6 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary mx-auto"></div>
-              <p className="mt-2 text-text-secondary">Creando un nuevo icono...</p>
-            </div>
-          )}
-          {generationError && <p className="mt-4 text-red-400">{generationError}</p>}
-          {generatedIconUrl && (
-            <div className="mt-6">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold text-text-primary">Icono Generado:</h3>
-                <button
-                  onClick={handleDownloadIcon}
-                  className="inline-flex items-center justify-center gap-2 px-3 py-1.5 border border-base-300 text-sm font-medium rounded-md text-text-secondary hover:bg-base-300 hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary focus:ring-offset-base-200 transition-colors"
-                  aria-label="Descargar icono generado"
-                >
-                  <ArrowDownTrayIcon className="w-5 h-5" />
-                  <span>Descargar</span>
-                </button>
-              </div>
-              <div className="mt-2 p-4 bg-base-300 rounded-lg inline-block">
-                <img src={generatedIconUrl} alt="Icono generado por IA" className="w-32 h-32 rounded-md object-cover" />
-              </div>
-            </div>
-          )}
-        </div>
 
         {expenses.length > 0 ? (
           <div className="space-y-8">

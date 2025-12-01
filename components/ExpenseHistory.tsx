@@ -61,7 +61,7 @@ const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDel
   return (
     <div className="bg-base-200 shadow-lg rounded-lg overflow-hidden">
       <div className="p-4 sm:p-6 border-b border-base-300 flex justify-between items-center">
-        <h2 className="text-xl font-bold text-text-primary">Historial de Registros</h2>
+        <h2 className="text-xl font-bold text-text-primary">Historial de Gastos</h2>
         {expenses.length > 0 && (
           <button 
             onClick={handleExport}
@@ -81,9 +81,9 @@ const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDel
             <thead className="bg-base-300/50 hidden md:table-header-group">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Fecha</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Coste Total</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Litros</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Precio/Litro</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Coste Total</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Odómetro</th>
                 <th scope="col" className="relative px-6 py-3">
                   <span className="sr-only">Eliminar</span>
@@ -105,21 +105,21 @@ const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDel
                         {new Date(expense.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </span>
                     </td>
-                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm text-text-secondary grid grid-cols-2 md:table-cell">
-                      <span className="flex items-center gap-2 md:hidden"><DropletIcon className="w-4 h-4"/> Litros</span>
-                      <span>{expense.liters.toFixed(2)} L</span>
-                    </td>
-                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm text-text-secondary grid grid-cols-2 md:table-cell">
-                      <span className="flex items-center gap-2 md:hidden"><EuroIcon className="w-4 h-4"/> Precio/Litro</span>
-                      <span>{expense.pricePerLiter.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}</span>
-                    </td>
-                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm font-bold text-brand-primary grid grid-cols-2 md:table-cell">
+                     <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm font-bold text-brand-primary grid grid-cols-2 md:table-cell order-first md:order-none">
                       <span className="font-medium text-text-secondary flex items-center gap-2 md:hidden"><EuroIcon className="w-4 h-4"/> Coste Total</span>
                       <span>{expense.totalCost.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}</span>
                     </td>
                     <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm text-text-secondary grid grid-cols-2 md:table-cell">
+                      <span className="flex items-center gap-2 md:hidden"><DropletIcon className="w-4 h-4"/> Litros</span>
+                      <span>{expense.liters > 0 ? `${expense.liters.toFixed(2)} L` : '-'}</span>
+                    </td>
+                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm text-text-secondary grid grid-cols-2 md:table-cell">
+                      <span className="flex items-center gap-2 md:hidden"><EuroIcon className="w-4 h-4"/> Precio/Litro</span>
+                      <span>{expense.pricePerLiter > 0 ? expense.pricePerLiter.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' }) : '-'}</span>
+                    </td>
+                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm text-text-secondary grid grid-cols-2 md:table-cell">
                       <span className="flex items-center gap-2 md:hidden"><TachometerIcon className="w-4 h-4"/> Odómetro</span>
-                      <span>{expense.odometer.toLocaleString('es-ES')} km</span>
+                      <span>{expense.odometer > 0 ? `${expense.odometer.toLocaleString('es-ES')} km` : '-'}</span>
                     </td>
                     <td className="px-6 py-2 md:py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button onClick={() => onInitiateDelete(expense.id)} className="text-red-500 hover:text-red-400 p-2 rounded-full hover:bg-red-500/10 transition-colors">
