@@ -2,12 +2,12 @@
 import React, { useMemo, useState } from 'react';
 import { ResponsiveContainer, LineChart, BarChart, XAxis, YAxis, Tooltip, Legend, Line, Bar, CartesianGrid } from 'recharts';
 import { type ExpenseEntry } from '../types';
-import { PencilIcon, CheckIcon, CloseIcon } from './icons';
+import { PencilIcon } from './icons';
 
 interface DashboardProps {
   expenses: ExpenseEntry[];
   budget: number;
-  onUpdateBudget: (newBudget: number) => void;
+  onOpenBudgetModal: () => void;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -37,88 +37,52 @@ const SummaryCard: React.FC<{ title: string; value: string; subtext?: string }> 
 const BudgetCard: React.FC<{ 
     budget: number; 
     spentThisMonth: number; 
-    onSave: (val: number) => void 
-}> = ({ budget, spentThisMonth, onSave }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [editValue, setEditValue] = useState(budget.toString());
-
+    onEditClick: () => void 
+}> = ({ budget, spentThisMonth, onEditClick }) => {
+    
     const percentage = budget > 0 ? Math.min((spentThisMonth / budget) * 100, 100) : 0;
     const isOverBudget = spentThisMonth > budget && budget > 0;
-    
-    const handleSave = () => {
-        const val = parseFloat(editValue);
-        if (!isNaN(val) && val >= 0) {
-            onSave(val);
-        }
-        setIsEditing(false);
-    };
-
-    const handleCancel = () => {
-        setEditValue(budget.toString());
-        setIsEditing(false);
-    };
 
     return (
         <div className="bg-base-200 p-4 rounded-lg shadow-md flex-1 min-w-[280px] flex flex-col justify-between">
             <div className="flex justify-between items-start">
                 <h3 className="text-sm font-medium text-text-secondary truncate">Control Mensual</h3>
-                {!isEditing && (
-                    <button onClick={() => setIsEditing(true)} className="text-text-secondary hover:text-brand-primary transition-colors">
-                        <PencilIcon className="w-4 h-4" />
-                    </button>
-                )}
+                <button 
+                  onClick={onEditClick} 
+                  className="text-text-secondary hover:text-brand-primary transition-colors p-1 rounded-full hover:bg-base-300"
+                  aria-label="Editar pressupost"
+                >
+                    <PencilIcon className="w-4 h-4" />
+                </button>
             </div>
 
-            {isEditing ? (
-                 <div className="mt-2 flex items-center gap-2">
-                    <div className="relative flex-1">
-                         <input 
-                            type="number" 
-                            className="w-full px-2 py-1 bg-base-300 border border-base-100 rounded text-text-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            autoFocus
-                        />
-                         <span className="absolute right-2 top-1 text-text-secondary">€</span>
-                    </div>
-                    <button onClick={handleSave} className="p-1.5 bg-brand-primary rounded text-white hover:bg-brand-secondary">
-                        <CheckIcon className="w-4 h-4" />
-                    </button>
-                    <button onClick={handleCancel} className="p-1.5 bg-base-300 rounded text-text-secondary hover:bg-base-100">
-                        <CloseIcon className="w-4 h-4" />
-                    </button>
-                </div>
-            ) : (
-                <>
-                    <div className="flex items-end gap-1 mt-1">
-                         <p className={`text-2xl font-bold ${isOverBudget ? 'text-red-500' : 'text-text-primary'}`}>
-                            {spentThisMonth.toLocaleString('ca-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}€
-                        </p>
-                        <p className="text-sm text-text-secondary mb-1">
-                             / {budget > 0 ? budget.toLocaleString('ca-ES') : '--'}€
-                        </p>
-                    </div>
+            <div className="flex items-end gap-1 mt-1">
+                    <p className={`text-2xl font-bold ${isOverBudget ? 'text-red-500' : 'text-text-primary'}`}>
+                    {spentThisMonth.toLocaleString('ca-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}€
+                </p>
+                <p className="text-sm text-text-secondary mb-1">
+                        / {budget > 0 ? budget.toLocaleString('ca-ES') : '--'}€
+                </p>
+            </div>
 
-                    <div className="mt-3 w-full bg-base-300 rounded-full h-2.5 overflow-hidden">
-                        <div 
-                            className={`h-2.5 rounded-full transition-all duration-500 ${isOverBudget ? 'bg-red-500' : 'bg-brand-primary'}`} 
-                            style={{ width: `${percentage}%` }}
-                        ></div>
-                    </div>
-                    <p className="text-xs text-text-secondary mt-1 text-right">
-                        {budget > 0 
-                            ? isOverBudget 
-                                ? `+${(spentThisMonth - budget).toFixed(0)}€ excedent` 
-                                : `${(budget - spentThisMonth).toFixed(0)}€ restants`
-                            : 'Defineix un pressupost'}
-                    </p>
-                </>
-            )}
+            <div className="mt-3 w-full bg-base-300 rounded-full h-2.5 overflow-hidden">
+                <div 
+                    className={`h-2.5 rounded-full transition-all duration-500 ${isOverBudget ? 'bg-red-500' : 'bg-brand-primary'}`} 
+                    style={{ width: `${percentage}%` }}
+                ></div>
+            </div>
+            <p className="text-xs text-text-secondary mt-1 text-right">
+                {budget > 0 
+                    ? isOverBudget 
+                        ? `+${(spentThisMonth - budget).toFixed(0)}€ excedent` 
+                        : `${(budget - spentThisMonth).toFixed(0)}€ restants`
+                    : 'Defineix un pressupost'}
+            </p>
         </div>
     );
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ expenses, budget, onUpdateBudget }) => {
+const Dashboard: React.FC<DashboardProps> = ({ expenses, budget, onOpenBudgetModal }) => {
   const [costChartType, setCostChartType] = useState<'bar' | 'line'>('bar');
 
   const chartData = useMemo(() => {
@@ -188,7 +152,7 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, budget, onUpdateBudget 
         <BudgetCard 
             budget={budget} 
             spentThisMonth={stats.spentThisMonth} 
-            onSave={onUpdateBudget} 
+            onEditClick={onOpenBudgetModal} 
         />
         <SummaryCard title="Despesa Total" value={stats.totalSpent.toLocaleString('ca-ES', { style: 'currency', currency: 'EUR' })} />
         
@@ -207,7 +171,7 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, budget, onUpdateBudget 
             <p className="text-text-secondary mt-2">Necessites almenys dos registres per visualitzar les tendències.</p>
         </div>
       ) : (
-        <div className={`grid grid-cols-1 ${hasLiterData ? 'lg:grid-cols-2' : ''} gap-6`}>
+        <div id="charts-section" className={`grid grid-cols-1 ${hasLiterData ? 'lg:grid-cols-2' : ''} gap-6 scroll-mt-24`}>
             <div className="bg-base-200 p-4 rounded-lg shadow-md h-80 flex flex-col order-first">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="font-semibold text-text-primary">Cost Total per Registre (€)</h3>
