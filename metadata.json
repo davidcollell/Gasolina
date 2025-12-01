@@ -1,5 +1,5 @@
 {
-  "name": "Control de Gasto de Gasolina",
-  "description": "Una aplicación web para llevar un registro de los gastos de gasolina, visualizar el historial y analizar tendencias con gráficos interactivos. Los datos se guardan localmente en tu navegador.",
+  "name": "Control de Despesa de Benzina",
+  "description": "Una aplicació web per portar un registre de les despeses de benzina, visualitzar l'historial i analitzar tendències amb gràfics interactius. Les dades es guarden localment al teu navegador.",
   "requestFramePermissions": []
 }

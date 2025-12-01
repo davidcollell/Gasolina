@@ -2,9 +2,12 @@
 import React, { useMemo, useState } from 'react';
 import { ResponsiveContainer, LineChart, BarChart, XAxis, YAxis, Tooltip, Legend, Line, Bar, CartesianGrid } from 'recharts';
 import { type ExpenseEntry } from '../types';
+import { PencilIcon, CheckIcon, CloseIcon } from './icons';
 
 interface DashboardProps {
   expenses: ExpenseEntry[];
+  budget: number;
+  onUpdateBudget: (newBudget: number) => void;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -14,7 +17,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p className="label text-text-secondary">{`${label}`}</p>
         {payload.map((pld: any, index: number) => (
           <p key={index} style={{ color: pld.color }} className="intro font-semibold">
-            {`${pld.name}: ${pld.value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${pld.unit || ''}`}
+            {`${pld.name}: ${pld.value.toLocaleString('ca-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${pld.unit || ''}`}
           </p>
         ))}
       </div>
@@ -31,23 +34,116 @@ const SummaryCard: React.FC<{ title: string; value: string; subtext?: string }> 
   </div>
 );
 
-const Dashboard: React.FC<DashboardProps> = ({ expenses }) => {
+const BudgetCard: React.FC<{ 
+    budget: number; 
+    spentThisMonth: number; 
+    onSave: (val: number) => void 
+}> = ({ budget, spentThisMonth, onSave }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [editValue, setEditValue] = useState(budget.toString());
+
+    const percentage = budget > 0 ? Math.min((spentThisMonth / budget) * 100, 100) : 0;
+    const isOverBudget = spentThisMonth > budget && budget > 0;
+    
+    const handleSave = () => {
+        const val = parseFloat(editValue);
+        if (!isNaN(val) && val >= 0) {
+            onSave(val);
+        }
+        setIsEditing(false);
+    };
+
+    const handleCancel = () => {
+        setEditValue(budget.toString());
+        setIsEditing(false);
+    };
+
+    return (
+        <div className="bg-base-200 p-4 rounded-lg shadow-md flex-1 min-w-[280px] flex flex-col justify-between">
+            <div className="flex justify-between items-start">
+                <h3 className="text-sm font-medium text-text-secondary truncate">Control Mensual</h3>
+                {!isEditing && (
+                    <button onClick={() => setIsEditing(true)} className="text-text-secondary hover:text-brand-primary transition-colors">
+                        <PencilIcon className="w-4 h-4" />
+                    </button>
+                )}
+            </div>
+
+            {isEditing ? (
+                 <div className="mt-2 flex items-center gap-2">
+                    <div className="relative flex-1">
+                         <input 
+                            type="number" 
+                            className="w-full px-2 py-1 bg-base-300 border border-base-100 rounded text-text-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            autoFocus
+                        />
+                         <span className="absolute right-2 top-1 text-text-secondary">€</span>
+                    </div>
+                    <button onClick={handleSave} className="p-1.5 bg-brand-primary rounded text-white hover:bg-brand-secondary">
+                        <CheckIcon className="w-4 h-4" />
+                    </button>
+                    <button onClick={handleCancel} className="p-1.5 bg-base-300 rounded text-text-secondary hover:bg-base-100">
+                        <CloseIcon className="w-4 h-4" />
+                    </button>
+                </div>
+            ) : (
+                <>
+                    <div className="flex items-end gap-1 mt-1">
+                         <p className={`text-2xl font-bold ${isOverBudget ? 'text-red-500' : 'text-text-primary'}`}>
+                            {spentThisMonth.toLocaleString('ca-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}€
+                        </p>
+                        <p className="text-sm text-text-secondary mb-1">
+                             / {budget > 0 ? budget.toLocaleString('ca-ES') : '--'}€
+                        </p>
+                    </div>
+
+                    <div className="mt-3 w-full bg-base-300 rounded-full h-2.5 overflow-hidden">
+                        <div 
+                            className={`h-2.5 rounded-full transition-all duration-500 ${isOverBudget ? 'bg-red-500' : 'bg-brand-primary'}`} 
+                            style={{ width: `${percentage}%` }}
+                        ></div>
+                    </div>
+                    <p className="text-xs text-text-secondary mt-1 text-right">
+                        {budget > 0 
+                            ? isOverBudget 
+                                ? `+${(spentThisMonth - budget).toFixed(0)}€ excedent` 
+                                : `${(budget - spentThisMonth).toFixed(0)}€ restants`
+                            : 'Defineix un pressupost'}
+                    </p>
+                </>
+            )}
+        </div>
+    );
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ expenses, budget, onUpdateBudget }) => {
   const [costChartType, setCostChartType] = useState<'bar' | 'line'>('bar');
 
   const chartData = useMemo(() => {
     // Reverse expenses for chart (oldest to newest)
     return [...expenses].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).map(e => ({
       ...e,
-      dateFormatted: new Date(e.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
+      dateFormatted: new Date(e.date).toLocaleDateString('ca-ES', { month: 'short', day: 'numeric' }),
     }));
   }, [expenses]);
   
   const stats = useMemo(() => {
-    if (expenses.length === 0) {
-      return { totalSpent: 0, totalLiters: 0, avgPricePerLiter: 0, avgConsumption: 0, totalDistance: 0 };
-    }
     const totalSpent = expenses.reduce((sum, e) => sum + e.totalCost, 0);
     const totalLiters = expenses.reduce((sum, e) => sum + e.liters, 0);
+    
+    // Calculate spent this month
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    const spentThisMonth = expenses
+        .filter(e => {
+            const d = new Date(e.date);
+            return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+        })
+        .reduce((sum, e) => sum + e.totalCost, 0);
     
     // Calculate avg price only for entries that have liters and price
     const entriesWithPrice = expenses.filter(e => e.liters > 0 && e.totalCost > 0);
@@ -79,17 +175,8 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses }) => {
         }
     }
 
-    return { totalSpent, totalLiters, avgPricePerLiter, avgConsumption, totalDistance };
+    return { totalSpent, totalLiters, avgPricePerLiter, avgConsumption, totalDistance, spentThisMonth };
   }, [expenses]);
-
-  if (expenses.length < 2) {
-    return (
-      <div className="bg-base-200 p-6 rounded-lg shadow-md text-center">
-        <h2 className="text-lg font-semibold text-text-primary">Datos Insuficientes para Gráficos</h2>
-        <p className="text-text-secondary mt-2">Necesitas al menos dos registros para visualizar las tendencias.</p>
-      </div>
-    );
-  }
 
   // Determine if we should show secondary metrics based on if we have data for them
   const hasLiterData = stats.totalLiters > 0;
@@ -98,84 +185,91 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses }) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-4">
-        <SummaryCard title="Gasto Total" value={stats.totalSpent.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })} />
-        {hasLiterData ? (
-             <SummaryCard title="Litros Totales" value={`${stats.totalLiters.toFixed(2)} L`} />
-        ) : (
-             <SummaryCard title="Registros" value={`${expenses.length}`} subtext="Total entradas" />
-        )}
+        <BudgetCard 
+            budget={budget} 
+            spentThisMonth={stats.spentThisMonth} 
+            onSave={onUpdateBudget} 
+        />
+        <SummaryCard title="Despesa Total" value={stats.totalSpent.toLocaleString('ca-ES', { style: 'currency', currency: 'EUR' })} />
         
         {hasLiterData && (
-             <SummaryCard title="Precio Medio Est." value={`${stats.avgPricePerLiter.toFixed(3)} €/L`} />
+             <SummaryCard title="Preu Mitjà Est." value={`${stats.avgPricePerLiter.toFixed(3)} €/L`} />
         )}
 
         {hasDistanceData && (
-            <SummaryCard title="Consumo Medio" value={`${stats.avgConsumption > 0 ? stats.avgConsumption.toFixed(2) : 'N/A'}`} subtext={stats.avgConsumption > 0 ? "L / 100km" : "Necesita más datos"}/>
+            <SummaryCard title="Consum Mitjà" value={`${stats.avgConsumption > 0 ? stats.avgConsumption.toFixed(2) : 'N/A'}`} subtext={stats.avgConsumption > 0 ? "L / 100km" : "Necessita més dades"}/>
         )}
       </div>
 
-      <div className={`grid grid-cols-1 ${hasLiterData ? 'lg:grid-cols-2' : ''} gap-6`}>
-        <div className="bg-base-200 p-4 rounded-lg shadow-md h-80 flex flex-col order-first">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold text-text-primary">Coste Total por Registro (€)</h3>
-            <div className="flex items-center bg-base-300 rounded-md p-0.5">
-              <button
-                onClick={() => setCostChartType('bar')}
-                className={`px-2 py-1 text-xs font-semibold rounded-md transition-colors ${
-                  costChartType === 'bar' ? 'bg-brand-primary text-white shadow' : 'text-text-secondary hover:bg-base-100/50'
-                }`}
-              >
-                Barras
-              </button>
-              <button
-                onClick={() => setCostChartType('line')}
-                className={`px-2 py-1 text-xs font-semibold rounded-md transition-colors ${
-                  costChartType === 'line' ? 'bg-brand-primary text-white shadow' : 'text-text-secondary hover:bg-base-100/50'
-                }`}
-              >
-                Línea
-              </button>
-            </div>
-          </div>
-          <ResponsiveContainer width="100%" height="100%">
-            {costChartType === 'bar' ? (
-              <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                <XAxis dataKey="dateFormatted" stroke="#d1d5db" tick={{ fontSize: 12 }} />
-                <YAxis stroke="#d1d5db" tick={{ fontSize: 12 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{fontSize: "14px", paddingTop: "20px"}} />
-                <Bar dataKey="totalCost" name="Coste Total" fill="#10b981" unit="€" />
-              </BarChart>
-            ) : (
-              <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
-                 <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                <XAxis dataKey="dateFormatted" stroke="#d1d5db" tick={{ fontSize: 12 }} />
-                <YAxis stroke="#d1d5db" tick={{ fontSize: 12 }} domain={['dataMin - 5', 'dataMax + 5']} tickFormatter={(value) => value.toFixed(0)} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{fontSize: "14px", paddingTop: "20px"}} />
-                <Line type="monotone" dataKey="totalCost" name="Coste Total" stroke="#34d399" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} unit="€" />
-              </LineChart>
-            )}
-          </ResponsiveContainer>
+      {expenses.length < 2 ? (
+         <div className="bg-base-200 p-6 rounded-lg shadow-md text-center">
+            <h2 className="text-lg font-semibold text-text-primary">Dades Insuficients per a Gràfics</h2>
+            <p className="text-text-secondary mt-2">Necessites almenys dos registres per visualitzar les tendències.</p>
         </div>
-
-        {hasLiterData && (
-            <div className="bg-base-200 p-4 rounded-lg shadow-md h-80">
-            <h3 className="font-semibold text-text-primary mb-4">Evolución del Precio por Litro (€)</h3>
+      ) : (
+        <div className={`grid grid-cols-1 ${hasLiterData ? 'lg:grid-cols-2' : ''} gap-6`}>
+            <div className="bg-base-200 p-4 rounded-lg shadow-md h-80 flex flex-col order-first">
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold text-text-primary">Cost Total per Registre (€)</h3>
+                <div className="flex items-center bg-base-300 rounded-md p-0.5">
+                <button
+                    onClick={() => setCostChartType('bar')}
+                    className={`px-2 py-1 text-xs font-semibold rounded-md transition-colors ${
+                    costChartType === 'bar' ? 'bg-brand-primary text-white shadow' : 'text-text-secondary hover:bg-base-100/50'
+                    }`}
+                >
+                    Barres
+                </button>
+                <button
+                    onClick={() => setCostChartType('line')}
+                    className={`px-2 py-1 text-xs font-semibold rounded-md transition-colors ${
+                    costChartType === 'line' ? 'bg-brand-primary text-white shadow' : 'text-text-secondary hover:bg-base-100/50'
+                    }`}
+                >
+                    Línia
+                </button>
+                </div>
+            </div>
             <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData.filter(d => d.pricePerLiter > 0)} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-                <XAxis dataKey="dateFormatted" stroke="#d1d5db" tick={{ fontSize: 12 }} />
-                <YAxis stroke="#d1d5db" tick={{ fontSize: 12 }} domain={['dataMin - 0.05', 'dataMax + 0.05']} tickFormatter={(value) => value.toFixed(2)} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{fontSize: "14px", paddingTop: "20px"}} />
-                <Line type="monotone" dataKey="pricePerLiter" name="Precio/Litro" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} unit="€" />
+                {costChartType === 'bar' ? (
+                <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+                    <XAxis dataKey="dateFormatted" stroke="#d1d5db" tick={{ fontSize: 12 }} />
+                    <YAxis stroke="#d1d5db" tick={{ fontSize: 12 }} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend wrapperStyle={{fontSize: "14px", paddingTop: "20px"}} />
+                    <Bar dataKey="totalCost" name="Cost Total" fill="#10b981" unit="€" />
+                </BarChart>
+                ) : (
+                <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+                    <XAxis dataKey="dateFormatted" stroke="#d1d5db" tick={{ fontSize: 12 }} />
+                    <YAxis stroke="#d1d5db" tick={{ fontSize: 12 }} domain={['dataMin - 5', 'dataMax + 5']} tickFormatter={(value) => value.toFixed(0)} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend wrapperStyle={{fontSize: "14px", paddingTop: "20px"}} />
+                    <Line type="monotone" dataKey="totalCost" name="Cost Total" stroke="#34d399" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} unit="€" />
                 </LineChart>
+                )}
             </ResponsiveContainer>
             </div>
-        )}
-      </div>
+
+            {hasLiterData && (
+                <div className="bg-base-200 p-4 rounded-lg shadow-md h-80">
+                <h3 className="font-semibold text-text-primary mb-4">Evolució del Preu per Litre (€)</h3>
+                <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData.filter(d => d.pricePerLiter > 0)} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
+                    <XAxis dataKey="dateFormatted" stroke="#d1d5db" tick={{ fontSize: 12 }} />
+                    <YAxis stroke="#d1d5db" tick={{ fontSize: 12 }} domain={['dataMin - 0.05', 'dataMax + 0.05']} tickFormatter={(value) => value.toFixed(2)} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend wrapperStyle={{fontSize: "14px", paddingTop: "20px"}} />
+                    <Line type="monotone" dataKey="pricePerLiter" name="Preu/Litre" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} unit="€" />
+                    </LineChart>
+                </ResponsiveContainer>
+                </div>
+            )}
+        </div>
+      )}
     </div>
   );
 };

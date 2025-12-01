@@ -1,11 +1,11 @@
 {
-  "name": "Control de Gasto de Gasolina",
-  "short_name": "Gasolina",
+  "name": "Control de Despesa de Benzina",
+  "short_name": "Benzina",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1f2937",
   "theme_color": "#1f2937",
-  "description": "Lleva un registro de tus gastos de gasolina y analiza tendencias.",
+  "description": "Porta un registre de les teves despeses de benzina i analitza tendències.",
   "orientation": "portrait",
   "icons": [
     {

@@ -8,6 +8,7 @@ import { CarIcon, ExclamationTriangleIcon, ArrowDownTrayIcon } from './component
 
 const App: React.FC = () => {
   const [expenses, setExpenses] = useState<ExpenseEntry[]>([]);
+  const [budget, setBudget] = useState<number>(0);
   
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [showFormContent, setShowFormContent] = useState(false);
@@ -51,6 +52,8 @@ const App: React.FC = () => {
   useEffect(() => {
     try {
       const storedExpenses = localStorage.getItem('gasExpenses');
+      const storedBudget = localStorage.getItem('gasBudget');
+      
       if (storedExpenses) {
         // FIX: Cast to any[] and use type guards for safer data migration from localStorage.
         // This prevents the "Spread types may only be created from object types" error.
@@ -65,6 +68,10 @@ const App: React.FC = () => {
         });
         setExpenses((migratedExpenses as ExpenseEntry[]).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
       }
+
+      if (storedBudget) {
+        setBudget(parseFloat(storedBudget));
+      }
     } catch (error) {
       console.error("Failed to load data from localStorage", error);
     }
@@ -77,6 +84,14 @@ const App: React.FC = () => {
       console.error("Failed to save expenses to localStorage", error);
     }
   }, [expenses]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('gasBudget', budget.toString());
+    } catch (error) {
+      console.error("Failed to save budget to localStorage", error);
+    }
+  }, [budget]);
 
 
   useEffect(() => {
@@ -157,7 +172,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-3">
             <CarIcon className="w-8 h-8 text-brand-primary" />
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-primary">
-              Control de Gasolina
+              Control de Benzina
             </h1>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
@@ -167,14 +182,14 @@ const App: React.FC = () => {
                   className="inline-flex items-center justify-center gap-2 px-3 py-2 border border-brand-primary text-sm font-medium rounded-md text-brand-primary bg-transparent hover:bg-brand-primary/10 transition-colors"
                 >
                   <ArrowDownTrayIcon className="w-5 h-5" />
-                  <span className="hidden sm:inline">Instalar App</span>
+                  <span className="hidden sm:inline">Instal·lar App</span>
                 </button>
             )}
             <button
                 onClick={handleOpenForm}
                 className="hidden md:inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary focus:ring-offset-base-100 transition-colors"
             >
-                Añadir Registro
+                Afegir Registre
             </button>
           </div>
         </div>
@@ -206,10 +221,10 @@ const App: React.FC = () => {
                 <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-500/10">
                     <ExclamationTriangleIcon className="h-6 w-6 text-red-500" />
                 </div>
-                <h3 className="mt-5 text-lg font-medium leading-6 text-text-primary">Eliminar Registro</h3>
+                <h3 className="mt-5 text-lg font-medium leading-6 text-text-primary">Eliminar Registre</h3>
                 <div className="mt-2 px-4 text-sm">
                     <p className="text-text-secondary">
-                        ¿Estás seguro de que quieres eliminar este registro? Esta acción no se puede deshacer.
+                        ¿Estàs segur que vols eliminar aquest registre? Aquesta acció no es pot desfer.
                     </p>
                 </div>
               </div>
@@ -219,7 +234,7 @@ const App: React.FC = () => {
                   onClick={handleCancelDelete}
                   className="px-4 py-2 text-sm font-medium rounded-md text-text-primary bg-base-300 hover:bg-gray-500 transition-colors"
                 >
-                  Cancelar
+                  Cancel·lar
                 </button>
                 <button
                   type="button"
@@ -233,10 +248,10 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {expenses.length > 0 ? (
+        {expenses.length > 0 || budget > 0 ? (
           <div className="space-y-8">
             <div className="animate-fadeInUp" style={{ animationDelay: '150ms' }}>
-              <Dashboard expenses={sortedExpenses} />
+              <Dashboard expenses={sortedExpenses} budget={budget} onUpdateBudget={setBudget} />
             </div>
             <div className="animate-fadeInUp" style={{ animationDelay: '300ms' }}>
               <ExpenseHistory expenses={expenses} onInitiateDelete={handleInitiateDelete} newlyAddedId={newlyAddedId} />
@@ -244,13 +259,13 @@ const App: React.FC = () => {
           </div>
         ) : (
           <div className="text-center py-20 px-6 bg-base-200 rounded-lg shadow-md animate-fadeInUp" style={{ animationDelay: '150ms' }}>
-            <h2 className="text-2xl font-semibold text-text-primary mb-2">¡Sin registros!</h2>
-            <p className="text-text-secondary mb-6">Aún no has añadido ningún registro. <br/> Haz clic en el botón para empezar.</p>
+            <h2 className="text-2xl font-semibold text-text-primary mb-2">Sense registres!</h2>
+            <p className="text-text-secondary mb-6">Encara no has afegit cap registre. <br/> Fes clic al botó per començar.</p>
             <button
               onClick={handleOpenForm}
               className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary focus:ring-offset-base-100 transition-colors"
             >
-              Añadir Primer Registro
+              Afegir Primer Registre
             </button>
           </div>
         )}
@@ -260,7 +275,7 @@ const App: React.FC = () => {
          <button
             onClick={handleOpenForm}
             className="w-14 h-14 rounded-full bg-brand-primary hover:bg-brand-secondary text-white flex items-center justify-center shadow-lg transition-transform hover:scale-105"
-            aria-label="Añadir Registro"
+            aria-label="Afegir Registre"
           >
             <svg xmlns="http://www.w.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

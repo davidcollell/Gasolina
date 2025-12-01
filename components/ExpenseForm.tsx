@@ -15,7 +15,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense, onCancel }) => 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !totalCost) {
-        alert("Por favor, rellena todos los campos.");
+        alert("Si us plau, omple tots els camps.");
         return;
     }
 
@@ -41,15 +41,15 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense, onCancel }) => 
       <button onClick={onCancel} className="absolute top-3 right-3 text-text-secondary hover:text-text-primary transition-colors">
         <CloseIcon className="w-6 h-6" />
       </button>
-      <h2 className="text-xl font-bold mb-6 text-text-primary">Añadir Gasto</h2>
+      <h2 className="text-xl font-bold mb-6 text-text-primary">Afegir Despesa</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="date" className="block text-sm font-medium text-text-secondary mb-1">Fecha</label>
+          <label htmlFor="date" className="block text-sm font-medium text-text-secondary mb-1">Data</label>
           <input type="date" id="date" value={date} onChange={e => setDate(e.target.value)} className={commonInputClasses} required />
         </div>
         
         <div>
-          <label htmlFor="totalCost" className="block text-sm font-medium text-text-secondary mb-1">Importe Pagado (€)</label>
+          <label htmlFor="totalCost" className="block text-sm font-medium text-text-secondary mb-1">Import Pagat (€)</label>
           <div className="relative">
             <input 
                 type="number" 
@@ -58,7 +58,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense, onCancel }) => 
                 onChange={e => setTotalCost(e.target.value)} 
                 step="0.01" 
                 min="0" 
-                placeholder="Ej: 50.00" 
+                placeholder="Ex: 50.00" 
                 className={`${commonInputClasses} pl-8 text-lg font-semibold`} 
                 required 
                 autoFocus
@@ -70,10 +70,10 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense, onCancel }) => 
         </div>
 
         <div className="pt-4 flex justify-end gap-3">
-            <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium rounded-md text-text-primary bg-base-300 hover:bg-gray-500 transition-colors">Cancelar</button>
+            <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium rounded-md text-text-primary bg-base-300 hover:bg-gray-500 transition-colors">Cancel·lar</button>
             <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary focus:ring-offset-base-100 transition-colors">
               <PlusIcon className="w-5 h-5" />
-              Guardar
+              Desar
             </button>
         </div>
       </form>
