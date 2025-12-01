@@ -5,8 +5,8 @@
       <stop offset="100%" style="stop-color:#111827;stop-opacity:1" />
     </linearGradient>
     <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#34d399;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
     </linearGradient>
   </defs>
   
@@ -27,6 +27,6 @@
        M256,232c-22.1,0-40-17.9-40-40c0-22.1,17.9-40,40-40s40,17.9,40,40C296,214.1,278.1,232,256,232z"/>
        
     <!-- Currency Symbol -->
-    <path fill="#10b981" d="M256,162c-5.5,0-10,4.5-10,10v40c0,5.5,4.5,10,10,10s10-4.5,10-10v-40C266,166.5,261.5,162,256,162z"/>
+    <path fill="#3b82f6" d="M256,162c-5.5,0-10,4.5-10,10v40c0,5.5,4.5,10,10,10s10-4.5,10-10v-40C266,166.5,261.5,162,256,162z"/>
   </g>
 </svg>

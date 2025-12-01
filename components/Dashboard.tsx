@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { ResponsiveContainer, LineChart, BarChart, XAxis, YAxis, Tooltip, Legend, Line, Bar, CartesianGrid } from 'recharts';
 import { type ExpenseEntry } from '../types';
@@ -202,7 +201,7 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, budget, onOpenBudgetMod
                     <YAxis stroke="#d1d5db" tick={{ fontSize: 12 }} />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend wrapperStyle={{fontSize: "14px", paddingTop: "20px"}} />
-                    <Bar dataKey="totalCost" name="Cost Total" fill="#10b981" unit="€" />
+                    <Bar dataKey="totalCost" name="Cost Total" fill="#3b82f6" unit="€" />
                 </BarChart>
                 ) : (
                 <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 20 }}>
@@ -211,7 +210,7 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, budget, onOpenBudgetMod
                     <YAxis stroke="#d1d5db" tick={{ fontSize: 12 }} domain={['dataMin - 5', 'dataMax + 5']} tickFormatter={(value) => value.toFixed(0)} />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend wrapperStyle={{fontSize: "14px", paddingTop: "20px"}} />
-                    <Line type="monotone" dataKey="totalCost" name="Cost Total" stroke="#34d399" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} unit="€" />
+                    <Line type="monotone" dataKey="totalCost" name="Cost Total" stroke="#60a5fa" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} unit="€" />
                 </LineChart>
                 )}
             </ResponsiveContainer>
@@ -227,7 +226,7 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, budget, onOpenBudgetMod
                     <YAxis stroke="#d1d5db" tick={{ fontSize: 12 }} domain={['dataMin - 0.05', 'dataMax + 0.05']} tickFormatter={(value) => value.toFixed(2)} />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend wrapperStyle={{fontSize: "14px", paddingTop: "20px"}} />
-                    <Line type="monotone" dataKey="pricePerLiter" name="Preu/Litre" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} unit="€" />
+                    <Line type="monotone" dataKey="pricePerLiter" name="Preu/Litre" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} unit="€" />
                     </LineChart>
                 </ResponsiveContainer>
                 </div>
