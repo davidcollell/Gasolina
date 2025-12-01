@@ -11,17 +11,19 @@ interface ExpenseFormProps {
 const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense, onCancel }) => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [totalCost, setTotalCost] = useState('');
+  const [notes, setNotes] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !totalCost) {
-        alert("Si us plau, omple tots els camps.");
+        alert("Si us plau, omple tots els camps obligatoris.");
         return;
     }
 
     const newExpense = {
       date,
       totalCost: parseFloat(totalCost),
+      notes: notes.trim(),
       // Valores por defecto ya que el usuario no los introduce
       liters: 0,
       pricePerLiter: 0,
@@ -32,9 +34,10 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense, onCancel }) => 
     // Reset form fields
     setDate(new Date().toISOString().split('T')[0]);
     setTotalCost('');
+    setNotes('');
   };
 
-  const commonInputClasses = "w-full px-3 py-2 bg-base-200 border border-base-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary transition-colors";
+  const commonInputClasses = "w-full px-3 py-2 bg-base-200 border border-base-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary text-text-primary transition-colors placeholder-text-secondary/50";
 
   return (
     <div className="bg-base-100 p-6 rounded-lg shadow-2xl w-full max-w-md mx-auto relative border border-base-300">
@@ -42,7 +45,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense, onCancel }) => 
         <CloseIcon className="w-6 h-6" />
       </button>
       <h2 className="text-xl font-bold mb-6 text-text-primary">Afegir Despesa</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label htmlFor="date" className="block text-sm font-medium text-text-secondary mb-1">Data</label>
           <input type="date" id="date" value={date} onChange={e => setDate(e.target.value)} className={commonInputClasses} required />
@@ -67,6 +70,17 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense, onCancel }) => 
               <span className="text-text-secondary">€</span>
             </div>
           </div>
+        </div>
+
+        <div>
+            <label htmlFor="notes" className="block text-sm font-medium text-text-secondary mb-1">Observacions (Opcional)</label>
+            <textarea
+                id="notes"
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder="Ex: Benzinera Repsol, viatge llarg..."
+                className={`${commonInputClasses} min-h-[80px] resize-none`}
+            />
         </div>
 
         <div className="pt-4 flex justify-end gap-3">

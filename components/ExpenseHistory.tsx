@@ -22,7 +22,8 @@ const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDel
     const headers = [
         "ID",
         "Data",
-        "Cost Total (€)"
+        "Cost Total (€)",
+        "Observacions"
     ];
     
     // Semicolon as separator for better compatibility with Excel in spanish/catalan locale
@@ -33,7 +34,9 @@ const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDel
         ...sortedForExport.map(e => toCsvRow([
             e.id,
             new Date(e.date).toISOString().split('T')[0], // YYYY-MM-DD format
-            String(e.totalCost).replace('.', ',')
+            String(e.totalCost).replace('.', ','),
+            // Replace semicolons and newlines in notes to avoid breaking CSV
+            e.notes ? `"${e.notes.replace(/"/g, '""').replace(/;/g, ',').replace(/\n/g, ' ')}"` : '""'
         ]))
     ].join('\n');
 
@@ -74,7 +77,7 @@ const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDel
           <table className="min-w-full divide-y divide-base-300">
             <thead className="bg-base-300/50 hidden md:table-header-group">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Data</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-1/2">Data i Detalls</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Cost Total</th>
                 <th scope="col" className="relative px-6 py-3">
                   <span className="sr-only">Eliminar</span>
@@ -90,11 +93,18 @@ const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDel
                     className={`md:table-row flex flex-row justify-between items-center p-4 md:p-0 mb-4 md:mb-0 bg-base-200 rounded-lg md:rounded-none shadow-md md:shadow-none hover:bg-base-300/50 transition-colors animate-fadeInUp ${isNew ? 'animate-highlight' : ''}`}
                     style={{ animationDelay: `${Math.min(index * 75, 750)}ms` }}
                   >
-                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm font-medium text-text-primary flex items-center gap-2">
-                      <CalendarIcon className="w-4 h-4 text-text-secondary md:hidden" />
-                      <span className="font-bold md:font-medium text-lg md:text-sm">
-                        {new Date(expense.date).toLocaleDateString('ca-ES', { year: 'numeric', month: 'short', day: 'numeric' })}
-                      </span>
+                    <td className="px-6 py-2 md:py-4 text-sm font-medium text-text-primary flex flex-col justify-center">
+                      <div className="flex items-center gap-2">
+                        <CalendarIcon className="w-4 h-4 text-text-secondary md:hidden" />
+                        <span className="font-bold md:font-medium text-lg md:text-sm">
+                            {new Date(expense.date).toLocaleDateString('ca-ES', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </span>
+                      </div>
+                      {expense.notes && (
+                          <p className="text-xs text-text-secondary mt-1 md:mt-0.5 line-clamp-1 italic pl-6 md:pl-0">
+                            {expense.notes}
+                          </p>
+                      )}
                     </td>
                      <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm font-bold text-brand-primary md:table-cell">
                       <div className="flex items-center gap-2 md:hidden text-text-secondary font-normal mb-1">

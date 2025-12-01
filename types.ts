@@ -7,4 +7,5 @@ export interface ExpenseEntry {
   pricePerLiter: number;
   totalCost: number;
   odometer: number;
+  notes?: string;
 }
