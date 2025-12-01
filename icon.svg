@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#111827;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#34d399;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background (Maskable Area) -->
+  <rect width="512" height="512" rx="120" fill="url(#grad1)" />
+  
+  <!-- Icon Graphics -->
+  <g transform="translate(106, 86) scale(0.6)">
+    <!-- Fuel Pump / Drop Hybrid Shape -->
+    <path fill="url(#grad2)" d="M256,32C167.6,32,96,103.6,96,192c0,72.6,48.5,133.5,114.6,153.2c-9.6,17.1-25.1,30.6-43.6,39.3
+      c-6.8,3.2-9.6,11.2-6.4,18c3.2,6.8,11.2,9.6,18,6.4c29.1-13.7,51.8-38.6,63.1-68.5c11.3,29.9,34,54.8,63.1,68.5
+      c2.5,1.2,5.2,1.8,7.8,1.8c4.6,0,9.1-2.2,11.8-6.1c3.5-5.1,2.7-12.2-2.4-15.8c-18.5-8.7-34-22.2-43.6-39.3
+      C363.5,325.5,412,264.6,412,192C412,103.6,340.4,32,256,32z M256,292c-55.2,0-100-44.8-100-100S200.8,92,256,92s100,44.8,100,100
+      S311.2,292,256,292z"/>
+      
+    <!-- Inner Drop -->
+    <path fill="#ffffff" fill-opacity="0.9" d="M256,122c-38.6,0-70,31.4-70,70c0,38.6,31.4,70,70,70s70-31.4,70-70C326,153.4,294.6,122,256,122z
+       M256,232c-22.1,0-40-17.9-40-40c0-22.1,17.9-40,40-40s40,17.9,40,40C296,214.1,278.1,232,256,232z"/>
+       
+    <!-- Currency Symbol -->
+    <path fill="#10b981" d="M256,162c-5.5,0-10,4.5-10,10v40c0,5.5,4.5,10,10,10s10-4.5,10-10v-40C266,166.5,261.5,162,256,162z"/>
+  </g>
+</svg>

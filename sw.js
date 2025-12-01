@@ -1,11 +1,11 @@
 
-const CACHE_NAME = 'gas-tracker-v1';
+const CACHE_NAME = 'gas-tracker-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/index.tsx',
   '/App.tsx',
-  '/favicon.svg',
+  '/icon.svg',
   '/types.ts',
   '/components/ExpenseForm.tsx',
   '/components/ExpenseHistory.tsx',
@@ -19,6 +19,8 @@ self.addEventListener('install', (event) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
+  // Force the waiting service worker to become the active service worker.
+  self.skipWaiting();
 });
 
 self.addEventListener('fetch', (event) => {
@@ -44,4 +46,6 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  // Tell the active service worker to take control of the page immediately.
+  return self.clients.claim();
 });
