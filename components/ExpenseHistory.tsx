@@ -56,8 +56,8 @@ const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDel
 
 
   return (
-    <div className="bg-base-200 shadow-lg rounded-lg overflow-hidden">
-      <div className="p-4 sm:p-6 border-b border-base-300 flex justify-between items-center">
+    <div className="md:bg-base-200 md:shadow-lg md:rounded-lg overflow-hidden bg-transparent shadow-none">
+      <div className="p-4 sm:p-6 md:border-b md:border-base-300 flex justify-between items-center bg-base-200 rounded-lg md:rounded-none shadow-md md:shadow-none mb-6 md:mb-0">
         <h2 className="text-xl font-bold text-text-primary">Historial de Despeses</h2>
         {expenses.length > 0 && (
           <button 
@@ -66,15 +66,15 @@ const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDel
             aria-label="Exportar dades a CSV"
           >
             <ExportIcon className="w-5 h-5" />
-            <span>Exportar</span>
+            <span className="hidden sm:inline">Exportar</span>
           </button>
         )}
       </div>
       <div className="overflow-x-auto">
         {expenses.length === 0 ? (
-          <p className="text-center py-10 text-text-secondary">No hi ha registres per mostrar.</p>
+          <p className="text-center py-10 text-text-secondary bg-base-200 rounded-lg md:rounded-none">No hi ha registres per mostrar.</p>
         ) : (
-          <table className="min-w-full divide-y divide-base-300">
+          <table className="min-w-full md:divide-y md:divide-base-300 block md:table">
             <thead className="bg-base-300/50 hidden md:table-header-group">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-1/2">Data i Detalls</th>
@@ -84,36 +84,58 @@ const ExpenseHistory: React.FC<ExpenseHistoryProps> = ({ expenses, onInitiateDel
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-base-200 divide-y divide-base-300">
+            <tbody className="md:bg-base-200 md:divide-y md:divide-base-300 block md:table-row-group">
               {expenses.map((expense, index) => {
                 const isNew = expense.id === newlyAddedId;
                 return (
                   <tr 
                     key={expense.id} 
-                    className={`md:table-row flex flex-row justify-between items-center p-4 md:p-0 mb-4 md:mb-0 bg-base-200 rounded-lg md:rounded-none shadow-md md:shadow-none hover:bg-base-300/50 transition-colors animate-fadeInUp ${isNew ? 'animate-highlight' : ''}`}
+                    className={`
+                      relative flex flex-col md:table-row 
+                      p-5 md:p-0 mb-4 md:mb-0 
+                      bg-base-200 md:bg-transparent 
+                      rounded-xl md:rounded-none 
+                      shadow-md md:shadow-none 
+                      border border-base-300 md:border-transparent
+                      transition-all duration-500 animate-fadeInUp 
+                      ${isNew ? 'ring-2 ring-brand-primary bg-brand-primary/5' : ''}
+                    `}
                     style={{ animationDelay: `${Math.min(index * 75, 750)}ms` }}
                   >
-                    <td className="px-6 py-2 md:py-4 text-sm font-medium text-text-primary flex flex-col justify-center">
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="w-4 h-4 text-text-secondary md:hidden" />
-                        <span className="font-bold md:font-medium text-lg md:text-sm">
-                            {new Date(expense.date).toLocaleDateString('ca-ES', { year: 'numeric', month: 'short', day: 'numeric' })}
-                        </span>
-                      </div>
-                      {expense.notes && (
-                          <p className="text-xs text-text-secondary mt-1 md:mt-0.5 line-clamp-1 italic pl-6 md:pl-0">
-                            {expense.notes}
-                          </p>
-                      )}
+                    {/* Botón Eliminar (Mobile Absolute) */}
+                    <td className="absolute top-4 right-4 md:hidden">
+                       <button onClick={() => onInitiateDelete(expense.id)} className="text-text-secondary hover:text-red-500 p-1 rounded-full transition-colors">
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
                     </td>
-                     <td className="px-6 py-2 md:py-4 whitespace-nowrap text-sm font-bold text-brand-primary md:table-cell">
-                      <div className="flex items-center gap-2 md:hidden text-text-secondary font-normal mb-1">
-                          <EuroIcon className="w-4 h-4"/> 
-                          <span>Cost Total</span>
+
+                    {/* Data i Detalls */}
+                    <td className="px-0 md:px-6 py-1 md:py-4 text-sm font-medium text-text-primary block md:table-cell w-full md:w-auto">
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2 mb-1 md:mb-0">
+                          <CalendarIcon className="w-4 h-4 text-brand-primary md:hidden" />
+                          <span className="text-sm font-bold md:font-medium text-text-primary uppercase md:normal-case tracking-wide md:tracking-normal opacity-80 md:opacity-100">
+                              {new Date(expense.date).toLocaleDateString('ca-ES', { year: 'numeric', month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
+                        {expense.notes && (
+                            <p className="text-sm text-text-secondary mt-2 md:mt-0.5 italic pl-0 md:pl-0 border-l-2 border-base-300 md:border-0 pl-3 md:pl-0">
+                              {expense.notes}
+                            </p>
+                        )}
                       </div>
-                      <span className="text-xl md:text-sm">{expense.totalCost.toLocaleString('ca-ES', { style: 'currency', currency: 'EUR' })}</span>
                     </td>
-                    <td className="px-6 py-2 md:py-4 whitespace-nowrap text-right text-sm font-medium">
+
+                     {/* Cost Total */}
+                     <td className="px-0 md:px-6 py-1 md:py-4 whitespace-nowrap text-brand-primary block md:table-cell w-full md:w-auto mt-2 md:mt-0">
+                      <div className="flex flex-col md:block">
+                          <span className="text-xs text-text-secondary uppercase tracking-wider mb-0.5 md:hidden">Cost Total</span>
+                          <span className="text-2xl md:text-sm font-bold">{expense.totalCost.toLocaleString('ca-ES', { style: 'currency', currency: 'EUR' })}</span>
+                      </div>
+                    </td>
+
+                    {/* Botón Eliminar (Desktop) */}
+                    <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button onClick={() => onInitiateDelete(expense.id)} className="text-red-500 hover:text-red-400 p-2 rounded-full hover:bg-red-500/10 transition-colors">
                         <TrashIcon className="w-5 h-5" />
                         <span className="sr-only">Eliminar</span>

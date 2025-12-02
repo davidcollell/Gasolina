@@ -1,5 +1,6 @@
+
 import React, { useMemo, useState } from 'react';
-import { ResponsiveContainer, LineChart, BarChart, XAxis, YAxis, Tooltip, Legend, Line, Bar, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, LineChart, BarChart, XAxis, YAxis, Tooltip, Legend, Line, Bar, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
 import { type ExpenseEntry } from '../types';
 import { PencilIcon } from './icons';
 
@@ -39,11 +40,48 @@ const BudgetCard: React.FC<{
     onEditClick: () => void 
 }> = ({ budget, spentThisMonth, onEditClick }) => {
     
-    const percentage = budget > 0 ? Math.min((spentThisMonth / budget) * 100, 100) : 0;
-    const isOverBudget = spentThisMonth > budget && budget > 0;
+    // Estat quan no hi ha pressupost definit
+    if (budget <= 0) {
+        return (
+            <div className="bg-base-200 p-4 rounded-lg shadow-md flex-1 min-w-[280px] flex flex-col justify-between min-h-[160px]">
+                <div className="flex justify-between items-start">
+                    <h3 className="text-sm font-medium text-text-secondary truncate">Control Mensual</h3>
+                </div>
+                
+                <div className="flex flex-col items-center justify-center flex-grow py-2 text-center space-y-3">
+                    <p className="text-sm text-text-secondary">
+                        Defineix un límit per controlar la teva despesa mensual.
+                    </p>
+                    <button 
+                        onClick={onEditClick}
+                        className="px-4 py-2 bg-brand-primary text-white text-sm font-medium rounded-md hover:bg-brand-secondary transition-colors shadow-sm"
+                    >
+                        Definir Pressupost
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
+    // Estat normal amb pressupost
+    const percentage = Math.min((spentThisMonth / budget) * 100, 100);
+    const isOverBudget = spentThisMonth > budget;
+    const remaining = Math.max(budget - spentThisMonth, 0);
+
+    const data = [
+        { name: 'Gastat', value: spentThisMonth },
+        { name: 'Restant', value: remaining > 0 ? remaining : 0 }
+    ];
+
+    // Calcular color dinàmic (HSL) de Verd (120) a Vermell (0)
+    // 0% -> 120
+    // 100% -> 0
+    const hue = Math.max(0, 120 * (1 - percentage / 100));
+    // S'utilitza 75% saturació i 45% lluminositat per colors vibrants però llegibles
+    const dynamicColor = `hsl(${hue}, 75%, 45%)`;
+    
     return (
-        <div className="bg-base-200 p-4 rounded-lg shadow-md flex-1 min-w-[280px] flex flex-col justify-between">
+        <div className="bg-base-200 p-4 rounded-lg shadow-md flex-1 min-w-[280px] flex flex-col justify-between min-h-[160px]">
             <div className="flex justify-between items-start">
                 <h3 className="text-sm font-medium text-text-secondary truncate">Control Mensual</h3>
                 <button 
@@ -55,28 +93,57 @@ const BudgetCard: React.FC<{
                 </button>
             </div>
 
-            <div className="flex items-end gap-1 mt-1">
-                    <p className={`text-2xl font-bold ${isOverBudget ? 'text-red-500' : 'text-text-primary'}`}>
-                    {spentThisMonth.toLocaleString('ca-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}€
-                </p>
-                <p className="text-sm text-text-secondary mb-1">
-                        / {budget > 0 ? budget.toLocaleString('ca-ES') : '--'}€
-                </p>
-            </div>
+            <div className="flex items-center justify-between mt-2 flex-grow">
+                 <div className="flex flex-col justify-center">
+                    <div className="flex items-baseline gap-1.5">
+                        <p className={`text-2xl font-bold ${isOverBudget ? 'text-red-500' : 'text-text-primary'}`}>
+                            {spentThisMonth.toLocaleString('ca-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}€
+                        </p>
+                        <p className="text-sm text-text-secondary">
+                                / {budget.toLocaleString('ca-ES')}€
+                        </p>
+                    </div>
+                     <p className="text-xs text-text-secondary mt-1">
+                        {isOverBudget 
+                            ? `+${(spentThisMonth - budget).toFixed(0)}€ excedent` 
+                            : `${(budget - spentThisMonth).toFixed(0)}€ restants`
+                        }
+                    </p>
+                 </div>
 
-            <div className="mt-3 w-full bg-base-300 rounded-full h-2.5 overflow-hidden">
-                <div 
-                    className={`h-2.5 rounded-full transition-all duration-500 ${isOverBudget ? 'bg-red-500' : 'bg-brand-primary'}`} 
-                    style={{ width: `${percentage}%` }}
-                ></div>
+                 <div className="w-24 h-24 relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={data}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={30}
+                                outerRadius={40}
+                                startAngle={90}
+                                endAngle={-270}
+                                dataKey="value"
+                                stroke="none"
+                            >
+                                <Cell 
+                                    key="cell-spent" 
+                                    fill={isOverBudget ? "#ef4444" : dynamicColor} 
+                                />
+                                <Cell key="cell-remaining" fill="#374151" />
+                            </Pie>
+                        </PieChart>
+                    </ResponsiveContainer>
+                    {/* Centered Percentage Text */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span 
+                            className={`text-xs font-bold ${isOverBudget ? 'text-red-500' : 'text-text-primary'} animate-popIn`} 
+                            style={{ color: isOverBudget ? undefined : dynamicColor }}
+                        >
+                            {percentage.toFixed(0)}%
+                        </span>
+                    </div>
+                 </div>
             </div>
-            <p className="text-xs text-text-secondary mt-1 text-right">
-                {budget > 0 
-                    ? isOverBudget 
-                        ? `+${(spentThisMonth - budget).toFixed(0)}€ excedent` 
-                        : `${(budget - spentThisMonth).toFixed(0)}€ restants`
-                    : 'Defineix un pressupost'}
-            </p>
         </div>
     );
 }
